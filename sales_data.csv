@@ -1,0 +1,8 @@
+CustomerID,Product,Quantity,Price
+1,A,2,100
+2,B,1,200
+3,C,5,150
+4,D,2,120
+5,E,3,250
+1,A,1,100
+2,C,4,150
