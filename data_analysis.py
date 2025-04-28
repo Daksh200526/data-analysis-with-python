@@ -1,38 +1,30 @@
-# house_price_prediction.py
+# data_analysis_project.py
 
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 
-# Load dataset
-df = pd.read_csv("house_data.csv")  # Assume it has Size, Location, Bedrooms, Price
+# Load multiple datasets
+df_sales = pd.read_csv("sales_data.csv")
+df_customers = pd.read_csv("customer_data.csv")
 
-# Encode categorical features (Location)
-df = pd.get_dummies(df, columns=['Location'], drop_first=True)
+# Basic Cleaning
+df_sales.dropna(inplace=True)
+df_customers.drop_duplicates(inplace=True)
 
-# Define features and target
-X = df.drop('Price', axis=1)
-y = df['Price']
+# Merge datasets on 'CustomerID'
+df = pd.merge(df_sales, df_customers, on='CustomerID')
 
-# Split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Transform: Create TotalPrice column
+df['TotalPrice'] = df['Quantity'] * df['Price']
 
-# Train
-model = LinearRegression()
-model.fit(X_train, y_train)
+# Analysis: Top 5 customers by total spending
+top_customers = df.groupby('CustomerName')['TotalPrice'].sum().sort_values(ascending=False).head(5)
 
-# Predict
-y_pred = model.predict(X_test)
-
-# Evaluate
-print("MSE:", mean_squared_error(y_test, y_pred))
-print("R² Score:", r2_score(y_test, y_pred))
-
-# Plot
-plt.scatter(y_test, y_pred, alpha=0.7)
-plt.xlabel("Actual Prices")
-plt.ylabel("Predicted Prices")
-plt.title("Actual vs Predicted House Prices")
+# Visualization
+plt.figure(figsize=(10, 6))
+top_customers.plot(kind='bar', color='skyblue')
+plt.title('Top 5 Customers by Spending')
+plt.ylabel('Total Spending')
+plt.xlabel('Customer Name')
+plt.tight_layout()
 plt.show()
